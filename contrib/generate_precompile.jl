@@ -115,8 +115,8 @@ function generate_precompile_statements()
         close(master)
 
         # Check what the REPL displayed
-        repl_output = String(take!(repl_output_buffer))
-        println(repl_output)
+        # repl_output = String(take!(repl_output_buffer))
+        # println(repl_output)
 
         # Extract the precompile statements from stderr
         statements = Set{String}()
@@ -140,7 +140,7 @@ function generate_precompile_statements()
         end
 
         # Execute the collected precompile statements
-        for statement in sort(collect(statements))
+        include_time = @elapsed for statement in sort(collect(statements))
             # println(statement)
             try
                 Base.include_string(PrecompileStagingArea, statement)
@@ -150,8 +150,9 @@ function generate_precompile_statements()
             end
         end
         print(" $(length(statements)) generated in ")
-        Base.time_print((time() - start_time) * 10^9)
-        println()
+        tot_time = time() - start_time
+        Base.time_print(tot_time * 10^9)
+        print(" (overhead "); Base.time_print((tot_time - include_time) * 10^9); println(")")
     end
 
     return
